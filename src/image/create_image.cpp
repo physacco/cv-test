@@ -1,3 +1,5 @@
+// Copyright: This program is released into the public domain.
+
 #include <stdio.h>
 #include <vector>
 #include <stdexcept>
