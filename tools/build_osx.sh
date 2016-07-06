@@ -10,6 +10,8 @@ cd "$PROJECT_DIR"
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
+# use brew-installed opencv3
+export CMAKE_PREFIX_PATH=/usr/local/opt/opencv3
 cmake ..
 
 make
