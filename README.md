@@ -4,8 +4,11 @@ OpenCV sample programs.
 
 ## Build
 
-    mkdir build
-    cd build
-    cmake ..
-    make
+Linux
+
+    ./tools/build_linux.sh
+
+Mac OS X
+
+    ./tools/build_osx.sh
 

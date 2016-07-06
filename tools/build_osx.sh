@@ -14,4 +14,4 @@ cd $BUILD_DIR
 export CMAKE_PREFIX_PATH=/usr/local/opt/opencv3
 cmake ..
 
-make
+make -j $(sysctl -n hw.ncpu)

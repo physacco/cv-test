@@ -12,4 +12,4 @@ cd $BUILD_DIR
 
 cmake ..
 
-make
+make -j $(nproc)
