@@ -1,4 +1,4 @@
-SET(EXECUTABLES play_video play_camera)
+SET(EXECUTABLES play_video play_camera unpack_video)
 
 FOREACH(EXE ${EXECUTABLES})
   ADD_EXECUTABLE(${EXE} "${EXE}.cpp")
