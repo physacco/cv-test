@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+# pylint: disable=no-member
 
 """Show video info obtained by OpenCV.
 
@@ -14,14 +15,16 @@ import sys
 import cv2
 
 class CaptureProperties(object):
+    """This class is used to manage capture properties."""
     def __init__(self, cap):
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.fourcc = self.parseFourCC(cap.get(cv2.CAP_PROP_FOURCC))
+        self.fourcc = self.parse_fourcc(cap.get(cv2.CAP_PROP_FOURCC))
         self.frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     def show(self):
+        """Print capture properties to stdout."""
         print('FPS: %.3f' % self.fps)
         print('FourCC: %s' % self.fourcc)
         print('Frame Count: %d' % self.frame_count)
@@ -29,15 +32,20 @@ class CaptureProperties(object):
         print('Frame Height: %d' % self.frame_height)
 
     @staticmethod
-    def parseFourCC(value):
+    def parse_fourcc(value):
+        """Parse cv2.CAP_PROP_FOURCC into a 4-character string.
+        The value obtained by OpenCV is a float number.
+        """
         value = int(value)
-        a = value & 0xff
-        b = (value >> 8) & 0xff
-        c = (value >> 16) & 0xff
-        d = (value >> 24) & 0xff
-        return ''.join([chr(i) for i in [a, b, c, d]])
+        cc0 = value & 0xff
+        cc1 = (value >> 8) & 0xff
+        cc2 = (value >> 16) & 0xff
+        cc3 = (value >> 24) & 0xff
+        chars = [chr(i) for i in [cc0, cc1, cc2, cc3]]
+        return ''.join(chars)
 
-if __name__ == '__main__':
+def main():
+    """The main function of this module."""
     file_count = len(sys.argv) - 1
     if file_count < 1:
         sys.stderr.write('Usage: %s file1 [file2 ...]\n' % sys.argv[0])
@@ -55,3 +63,6 @@ if __name__ == '__main__':
         props.show()
         if file_count > 1 and i < file_count - 1:
             print('-' * 30)
+
+if __name__ == '__main__':
+    main()
