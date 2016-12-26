@@ -1,5 +1,6 @@
 // Copyright: This program is released into the public domain.
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -71,8 +72,13 @@ int main(int argc, char** argv) {
 
   try {
     fprintf(stderr, "Saving image file ...\n");
-    cv::imwrite(output_file, image, compression_params);
-    printf("Image saved to [%s]\n", output_file);
+    int ok = cv::imwrite(output_file, image, compression_params);
+    if (ok) {
+      printf("Image saved to [%s]\n", output_file);
+    } else {
+      fprintf(stderr, "Cannot save image: %s\n", output_file);
+      exit(3);
+    }
   } catch (std::runtime_error& ex) {
     fprintf(stderr, "Cannot save image: %s\n", ex.what());
     exit(3);
