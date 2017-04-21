@@ -12,6 +12,13 @@ def main():
     cv2.namedWindow('video', cv2.WINDOW_AUTOSIZE)
 
     cap = cv2.VideoCapture(0)
+
+    # Set the image resolution.
+    # If the camera's resolution is less than 1920x1080,
+    # it will use its maximum resolution. Need test.
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
     i = 0
     while cap.isOpened():
         ret, frame = cap.read()
