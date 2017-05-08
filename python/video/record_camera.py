@@ -23,8 +23,11 @@ def main():
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
+    # Use 'x264' on Linux, and 'mp4v' or 'avc1' on Mac OS X.
+    # See https://gist.github.com/takuma7/44f9ecb028ff00e2132e
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+
     output_file = 'output.mp4'
-    fourcc = cv2.VideoWriter_fourcc(*'X264')
     wrt = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
 
     while cap.isOpened():

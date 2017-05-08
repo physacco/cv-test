@@ -4,7 +4,6 @@
 
 """Play a video with OpenCV."""
 
-import sys
 import cv2
 
 def main():
@@ -27,12 +26,12 @@ def main():
 
         i += 1
         if i == 1:
-            print frame.shape, frame.dtype, frame.size
+            print(frame.shape, frame.dtype, frame.size)
 
         cv2.imshow('video', frame)
 
-        key = cv2.waitKey(30)
-        if key & 0xFF == ord('q'):  # quit
+        key = cv2.waitKey(30) % 256
+        if key == 27 or key == ord('q'):  # ESC, quit
             break
 
     cap.release()
