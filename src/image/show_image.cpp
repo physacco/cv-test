@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   }
 
   cv::Mat image = cv::imread(argv[1], cv::IMREAD_COLOR);
-  if (image.empty()) {
+  if (image.empty()) {  // see [1]
     std::cout <<  "Could not open or find the image" << std::endl;
     return -1;
   }
@@ -25,3 +25,8 @@ int main(int argc, char** argv) {
   cv::waitKey(0);  // Wait for a keystroke in the window
   return 0;
 }
+
+// [1] The result of cv::imread, cv::VideoCapture::read
+// can be determined by the output Mat's properties:
+// Success: cols >  0, rows >  0, data != NULL, empty() == 0
+// Failure: cols == 0, rows == 0, data == NULL, empty() == 1

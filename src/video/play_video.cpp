@@ -19,6 +19,10 @@ int main(int argc, char** argv) {
   while (true) {
     cv::Mat frame;
     cap >> frame;  // read a new frame
+    if (frame.empty()) {  // see [1]
+      break;
+    }
+
     cv::imshow("Video", frame);
 
     int key = cv::waitKey(30);
@@ -32,3 +36,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+// [1] The result of cv::imread, cv::VideoCapture::read
+// can be determined by the output Mat's properties:
+// Success: cols >  0, rows >  0, data != NULL, empty() == 0
+// Failure: cols == 0, rows == 0, data == NULL, empty() == 1
