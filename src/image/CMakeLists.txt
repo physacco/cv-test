@@ -1,4 +1,4 @@
-SET(EXECUTABLES show_image show_image_gray create_image histeq webp2jpg)
+SET(EXECUTABLES show_image show_image_gray show_raw_mat create_image histeq webp2jpg)
 
 FOREACH(EXE ${EXECUTABLES})
   ADD_EXECUTABLE(${EXE} "${EXE}.cpp")
