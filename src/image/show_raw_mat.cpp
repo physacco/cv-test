@@ -70,6 +70,7 @@ void show_images() {
     std::vector<uint8_t> data = read_file(path.c_str());
     cv::Mat image(cv::Size(ImageWidth, ImageHeight), CV_8UC3, data.data());
     cv::imshow(path, image);
+    cv::moveWindow(path, 10, 10);
     int key = cv::waitKey(0) & 0xff;
     if (key == 'q') {
       break;
