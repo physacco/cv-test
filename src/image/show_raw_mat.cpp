@@ -12,7 +12,7 @@
 #include <opencv2/opencv.hpp>
 
 static const char* program = "show_raw_mat";
-static const char* version = "0.1.0";
+static const char* version = "0.1.1";
 static const char* usage =
     "Usage: %s [options] file1 [file2 ...]\n"
     "\n"
@@ -21,10 +21,12 @@ static const char* usage =
     "  -v, --version                Print version message and exit\n"
     "  -W, --width <Number>         Image width in pixels (Def: %d)\n"
     "  -H, --height <Number>        Image height in pixels (Def: %d)\n"
+    "  -F, --format <String>        Image data format (Def: rgb)\n"
     "\n";
 
 static int ImageWidth = 1280;
 static int ImageHeight = 720;
+static std::string DataFormat = "rgb";
 static std::vector<std::string> InputFiles;
 
 size_t get_file_size(const char* file_name) {
@@ -68,8 +70,21 @@ void show_images() {
   for (auto& path : InputFiles) {
     fprintf(stderr, "Reading %s\n", path.c_str());
     std::vector<uint8_t> data = read_file(path.c_str());
-    cv::Mat image(cv::Size(ImageWidth, ImageHeight), CV_8UC3, data.data());
-    cv::imshow(path, image);
+    cv::Size dim(ImageWidth, ImageHeight);
+    cv::Mat image(dim, CV_8UC3, data.data());
+    cv::Mat out_image;
+
+    if (DataFormat == "bgr") {
+      out_image = image;
+    } else if (DataFormat == "rgb") {
+      cv::cvtColor(image, out_image, cv::COLOR_RGB2BGR);
+    } else {
+      fprintf(stderr, "Error: unsupported data format: %s\n",
+          DataFormat.c_str());
+      exit(1);
+    }
+
+    cv::imshow(path, out_image);
     cv::moveWindow(path, 10, 10);
     int key = cv::waitKey(0) & 0xff;
     if (key == 'q') {
@@ -87,10 +102,11 @@ int main(int argc, char** argv) {
       {"version", no_argument, &show_version, 'v'},
       {"width", required_argument, 0, 'W'},
       {"height", required_argument, 0, 'H'},
+      {"format", required_argument, 0, 'F'},
       {0, 0, 0, 0}};
 
   while (true) {
-    int opt = getopt_long(argc, argv, "hvW:H:", long_options, nullptr);
+    int opt = getopt_long(argc, argv, "hvW:H:F:", long_options, nullptr);
     if (opt == -1) {
       break;
     } else if (opt == 'h') {
@@ -103,6 +119,8 @@ int main(int argc, char** argv) {
       ImageWidth = atoi(optarg);
     } else if (opt == 'H') {
       ImageHeight = atoi(optarg);
+    } else if (opt == 'F') {
+      DataFormat = optarg;
     } else {  // 'h'
       fprintf(stderr, usage, program, ImageWidth, ImageHeight);
       exit(EXIT_FAILURE);
