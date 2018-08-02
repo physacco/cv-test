@@ -12,7 +12,7 @@
 #include <opencv2/opencv.hpp>
 
 static const char* program = "show_raw_mat";
-static const char* version = "0.1.1";
+static const char* version = "0.1.2";
 static const char* usage =
     "Usage: %s [options] file1 [file2 ...]\n"
     "\n"
@@ -21,11 +21,13 @@ static const char* usage =
     "  -v, --version                Print version message and exit\n"
     "  -W, --width <Number>         Image width in pixels (Def: %d)\n"
     "  -H, --height <Number>        Image height in pixels (Def: %d)\n"
+    "      --offset <Number>        Image data offset (Def: 0)\n"
     "  -F, --format <String>        Image data format (Def: rgb)\n"
     "\n";
 
 static int ImageWidth = 1280;
 static int ImageHeight = 720;
+static int DataOffset = 0;
 static std::string DataFormat = "rgb";
 static std::vector<std::string> InputFiles;
 
@@ -71,7 +73,7 @@ void show_images() {
     fprintf(stderr, "Reading %s\n", path.c_str());
     std::vector<uint8_t> data = read_file(path.c_str());
     cv::Size dim(ImageWidth, ImageHeight);
-    cv::Mat image(dim, CV_8UC3, data.data());
+    cv::Mat image(dim, CV_8UC3, data.data() + DataOffset);
     cv::Mat out_image;
 
     if (DataFormat == "bgr") {
@@ -102,13 +104,25 @@ int main(int argc, char** argv) {
       {"version", no_argument, &show_version, 'v'},
       {"width", required_argument, 0, 'W'},
       {"height", required_argument, 0, 'H'},
+      {"offset", required_argument, 0, 0},
       {"format", required_argument, 0, 'F'},
       {0, 0, 0, 0}};
 
   while (true) {
-    int opt = getopt_long(argc, argv, "hvW:H:F:", long_options, nullptr);
+    int opt_index = 0;
+    int opt = getopt_long(argc, argv, "hvW:H:F:", long_options, &opt_index);
     if (opt == -1) {
       break;
+    } else if (opt == 0) {
+      const char* name = long_options[opt_index].name;
+      if (name != nullptr) {
+        if (strcmp(name, "offset") == 0) {
+            DataOffset = atoi(optarg);
+        } else {
+            fprintf(stderr, "Error: unknown option: %s\n", name);
+            exit(EXIT_FAILURE);
+        }
+      }
     } else if (opt == 'h') {
       printf(usage, program, ImageWidth, ImageHeight);
       exit(EXIT_SUCCESS);
