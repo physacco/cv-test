@@ -16,3 +16,6 @@ ENDFOREACH()
 
 ADD_EXECUTABLE(mat2jpg mat2jpg.cpp)
 TARGET_LINK_LIBRARIES(mat2jpg jpeg)
+
+ADD_EXECUTABLE(mat2png mat2png.cpp)
+TARGET_LINK_LIBRARIES(mat2png png)
