@@ -1,11 +1,11 @@
 // Copyright: This program is released into the public domain.
 //
-// Convert cv::Mat data file to JPEG file.
+// Convert cv::Mat data file to PNG file.
 // Install dependencies:
-//   apt-get install libjpeg8-dev
+//   apt-get install libpng-dev
 // Linker flags:
-//   dynamic: -L/usr/lib/x86_64-linux-gnu -ljpeg
-//   static: /usr/lib/x86_64-linux-gnu/libjpeg.a
+//   dynamic: -L/usr/lib/x86_64-linux-gnu -lpng
+//   static: /usr/lib/x86_64-linux-gnu/libpng.a
 
 #include <errno.h>
 #include <getopt.h>
