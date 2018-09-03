@@ -19,3 +19,6 @@ TARGET_LINK_LIBRARIES(mat2jpg jpeg)
 
 ADD_EXECUTABLE(mat2png mat2png.cpp)
 TARGET_LINK_LIBRARIES(mat2png png)
+
+ADD_EXECUTABLE(png2ppm png2ppm.cpp)
+TARGET_LINK_LIBRARIES(png2ppm png)
