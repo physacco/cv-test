@@ -12,6 +12,6 @@ cd $BUILD_DIR
 
 # use brew-installed opencv3
 export CMAKE_PREFIX_PATH=/usr/local/opt/opencv3
-cmake ${PROJECT_DIR}
+cmake --debug-output ${PROJECT_DIR}
 
 make -j $(sysctl -n hw.ncpu)
