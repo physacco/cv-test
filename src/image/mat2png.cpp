@@ -31,14 +31,13 @@ typedef struct {
   int width;
   int height;
   int quality;
+  int channels;
+  int depth;
   int data_offset;
   DataFormat data_format;
 } Config;
 
-static const png_byte ColorType = PNG_COLOR_TYPE_RGB;
-static const png_byte BitDepth = 8;
-
-static const char* program = "mat2jpg";
+static const char* program = "mat2png";
 static const char* version = "0.1.0";
 static const char* usage =
     "Usage: %s [options] input_file output_file\n"
@@ -49,6 +48,8 @@ static const char* usage =
     "  -W, --width <Number>         Image width in pixels (Def: %d)\n"
     "  -H, --height <Number>        Image height in pixels (Def: %d)\n"
     "  -Q, --quality <Number>       JPEG compression quality (Def: %d).\n"
+    "      --channels <Number>      RGB (3) or RGBA(4) (Def: 3)\n"
+    "      --depth <Number>         Channel bit depth (Def: %d)\n"
     "      --offset <Number>        Image data offset (Def: %d)\n"
     "  -F, --format <String>        Image data format (Def: %s)\n"
     "\n";
@@ -57,6 +58,8 @@ static Config config = {
     1280,             // width
     720,              // height
     90,               // quality
+    3,                // channels
+    8,                // depth
     0,                // data_offset
     DataFormat::RGB,  // data_format
 };
@@ -131,7 +134,8 @@ void bgr2rgb(char* data, int w, int h) {
   }
 }
 
-void write_png_file(const char* filename, char* data, int w, int h) {
+void write_png_file(const char* filename, char* data, int w, int h,
+  int channels, int depth) {
   FILE* fp = fopen(filename, "wb");
   if (fp == nullptr) {
     fprintf(stderr, "Cannot open %s: %s\n", filename, strerror(errno));
@@ -171,16 +175,26 @@ void write_png_file(const char* filename, char* data, int w, int h) {
     exit(1);
   }
 
+  png_byte bit_depth = depth;
+
+  png_byte color_type;
+  if (channels == 3) {
+    color_type = PNG_COLOR_TYPE_RGB;
+  } else {
+    color_type = PNG_COLOR_TYPE_RGBA;
+  }
+
   png_set_IHDR(png_ptr, info_ptr, w, h,
-               BitDepth, ColorType, PNG_INTERLACE_NONE,
+               bit_depth, color_type, PNG_INTERLACE_NONE,
                PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
   png_write_info(png_ptr, info_ptr);
 
   // prepare row pointers
   std::vector<png_bytep> row_pointers;
-  const int chan_width = BitDepth / 8;
-  const int row_bytes = chan_width * 3 * w;
+  const int chan_bytes = bit_depth / 8;
+  const int pixel_bytes = chan_bytes * channels;
+  const int row_bytes = pixel_bytes * w;
   for (int i = 0; i < h; ++i) {
     png_bytep row_ptr = reinterpret_cast<png_bytep>(data + row_bytes * i);
     row_pointers.push_back(row_ptr);
@@ -230,6 +244,8 @@ int main(int argc, char** argv) {
       {"version", no_argument, &show_version, 'v'},
       {"width", required_argument, 0, 'W'},
       {"height", required_argument, 0, 'H'},
+      {"channels", required_argument, 0, 0},
+      {"depth", required_argument, 0, 0},
       {"offset", required_argument, 0, 0},
       {"format", required_argument, 0, 'F'},
       {0, 0, 0, 0}};
@@ -242,7 +258,23 @@ int main(int argc, char** argv) {
     } else if (opt == 0) {
       const char* name = long_options[opt_index].name;
       if (name != nullptr) {
-        if (strcmp(name, "offset") == 0) {
+        if (strcmp(name, "channels") == 0) {
+          int chan = atoi(optarg);
+          if (!(chan == 3 || chan == 4)) {
+            fprintf(stderr, "Error: invalid value for channels\n");
+            exit(EXIT_FAILURE);
+          }
+
+          config.channels = chan;
+        } else if (strcmp(name, "depth") == 0) {
+          int depth = atoi(optarg);
+          if (!(depth == 8 || depth == 16)) {
+            fprintf(stderr, "Error: invalid value for depth\n");
+            exit(EXIT_FAILURE);
+          }
+
+          config.depth = depth;
+        } else if (strcmp(name, "offset") == 0) {
           config.data_offset = atoi(optarg);
         } else {
           fprintf(stderr, "Error: unknown option: %s\n", name);
@@ -291,8 +323,8 @@ int main(int argc, char** argv) {
     bgr2rgb(data, config.width, config.height);
   }
 
-  // write_jpeg_file2(output_file, data, config.width, config.height);
-  write_png_file(output_file, data, config.width, config.height);
+  write_png_file(output_file, data, config.width, config.height,
+    config.channels, config.depth);
 
   return 0;
 }
