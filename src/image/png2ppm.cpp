@@ -82,15 +82,13 @@ void write_ppm(FILE* f, uint8_t* data, int w, int h) {
 }
 
 PNGImage read_png(const char* filename) {
-  unsigned char header[8];  // 8 is the maximum size that can be checked
-
-  // open file and test for it being a png
   FILE* fp = fopen(filename, "rb");
   if (!fp) {
-    fprintf(stderr, "Cannot open %s: %s\n", filename, strerror(errno));
+    fprintf(stderr, "Error: cannot open %s: %s\n", filename, strerror(errno));
     exit(1);
   }
 
+  unsigned char header[8];  // 8 is the maximum size that can be checked
   fread(header, 1, 8, fp);
   if (png_sig_cmp(header, 0, 8)) {
     fprintf(stderr, "Error: not recognized as a PNG file\n");
@@ -99,7 +97,8 @@ PNGImage read_png(const char* filename) {
   }
 
   // initialize stuff
-  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+    nullptr, nullptr, nullptr);
   if (!png_ptr) {
     fprintf(stderr, "Error: png_create_read_struct failed\n");
     fclose(fp);
@@ -109,14 +108,14 @@ PNGImage read_png(const char* filename) {
   png_infop info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr) {
     fprintf(stderr, "Error: png_create_info_struct failed\n");
-    png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
+    png_destroy_read_struct(&png_ptr, nullptr, nullptr);
     fclose(fp);
     exit(1);
   }
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     fprintf(stderr, "Error: error during init_io\n");
-    png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     fclose(fp);
     exit(1);
   }
@@ -139,7 +138,7 @@ PNGImage read_png(const char* filename) {
     image.channels = 4;
   } else {
     fprintf(stderr, "Error: unsupported color type: %d\n", image.color_type);
-    png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     fclose(fp);
     exit(1);
   }
@@ -149,7 +148,7 @@ PNGImage read_png(const char* filename) {
   // read file
   if (setjmp(png_jmpbuf(png_ptr))) {
     fprintf(stderr, "Error: error during read_image\n");
-    png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     fclose(fp);
     exit(1);
   }
