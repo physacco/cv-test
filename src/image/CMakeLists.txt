@@ -6,7 +6,6 @@ SET(EXECUTABLES
   create_image
   histeq
   webp2jpg
-  img2ppm
 )
 
 FOREACH(EXE ${EXECUTABLES})
@@ -20,5 +19,8 @@ TARGET_LINK_LIBRARIES(mat2jpg jpeg)
 ADD_EXECUTABLE(mat2png mat2png.cpp)
 TARGET_LINK_LIBRARIES(mat2png png)
 
-ADD_EXECUTABLE(png2ppm png2ppm.cpp)
+ADD_EXECUTABLE(png2ppm png2ppm.cpp ppm.cpp)
 TARGET_LINK_LIBRARIES(png2ppm png)
+
+ADD_EXECUTABLE(img2ppm img2ppm.cpp ppm.cpp)
+TARGET_LINK_LIBRARIES(img2ppm ${OpenCV_LIBS})

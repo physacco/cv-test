@@ -12,6 +12,7 @@
 #include <png.h>
 #include <vector>
 #include <iostream>
+#include "ppm.h"
 
 typedef struct {
   std::vector<int8_t> data;
@@ -34,52 +35,8 @@ static const char* usage =
     "  -H, --headless               Do not write the file header\n"
     "\n";
 
-static bool ascii = false;
+static bool binary = true;
 static bool headless = false;
-
-void write_ppm_data_ascii(FILE* f, uint8_t* data, int w, int h) {
-  for (int i = 0; i < h; ++i) {
-    for (int j = 0; j < w; ++j) {
-      int offset = (i * w + j) * 3;
-      int r = data[offset + 0];
-      int g = data[offset + 1];
-      int b = data[offset + 2];
-      int ret = fprintf(f, "%d %d %d\n", r, g, b);
-      if (ret < 0) {
-        fprintf(stderr, "Error: write error: %s\n", strerror(errno));
-        return;
-      }
-    }
-  }
-}
-
-void write_ppm_data_binary(FILE* f, uint8_t* data, int w, int h) {
-  int data_size = w * h * 3;
-  int bytes = fwrite(data, 1, data_size, f);
-  if (bytes < data_size) {
-    fprintf(stderr, "Error: incomplete write: %d/%d: %s\n", bytes, data_size,
-            strerror(errno));
-  }
-}
-
-void write_ppm(FILE* f, uint8_t* data, int w, int h) {
-  if (headless == false) {
-    if (ascii) {
-      fprintf(f, "P3\n");
-    } else {
-      fprintf(f, "P6\n");
-    }
-
-    fprintf(f, "%d %d\n", w, h);
-    fprintf(f, "%d\n", 255);  // max color
-  }
-
-  if (ascii) {
-    write_ppm_data_ascii(f, data, w, h);
-  } else {
-    write_ppm_data_binary(f, data, w, h);
-  }
-}
 
 PNGImage read_png(const char* filename) {
   FILE* fp = fopen(filename, "rb");
@@ -192,7 +149,7 @@ int main(int argc, char** argv) {
       printf("%s version %s\n", program, version);
       exit(EXIT_SUCCESS);
     } else if (opt == 'A') {
-      ascii = true;
+      binary = false;
     } else if (opt == 'H') {
       headless = true;
     } else {  // 'h'
@@ -218,7 +175,7 @@ int main(int argc, char** argv) {
     exit(3);
   }
 
-  write_ppm(fout, (uint8_t*)image.data.data(), image.width, image.height);
+  write_ppm(fout, (uint8_t*)image.data.data(), image.width, image.height, headless, binary);
   fclose(fout);
 
   return 0;
