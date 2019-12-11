@@ -24,6 +24,8 @@ extern "C" {
 #include <string>
 #include <vector>
 
+#include "PNGUtils.h"
+
 // custom types
 enum class DataFormat { RGB, BGR };
 
@@ -132,95 +134,6 @@ void bgr2rgb(char* data, int w, int h) {
       *b = tmp;
     }
   }
-}
-
-void write_png_file(const char* filename, char* data, int w, int h,
-  int channels, int depth) {
-  FILE* fp = fopen(filename, "wb");
-  if (fp == nullptr) {
-    fprintf(stderr, "Cannot open %s: %s\n", filename, strerror(errno));
-    exit(1);
-  }
-
-  // initialize stuff
-  png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png_ptr) {
-    fprintf(stderr, "Error: png_create_write_struct failed\n");
-    fclose(fp);
-    exit(1);
-  }
-
-  png_infop info_ptr = png_create_info_struct(png_ptr);
-  if (!info_ptr) {
-    fprintf(stderr, "Error: png_create_info_struct failed\n");
-    png_destroy_write_struct(&png_ptr, (png_infopp)nullptr);
-    fclose(fp);
-    exit(1);
-  }
-
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    fprintf(stderr, "Error: error during init_io\n");
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-    fclose(fp);
-    exit(1);
-  }
-
-  png_init_io(png_ptr, fp);
-
-  // write header
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    fprintf(stderr, "Error: error during writing header\n");
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-    fclose(fp);
-    exit(1);
-  }
-
-  png_byte bit_depth = depth;
-
-  png_byte color_type;
-  if (channels == 3) {
-    color_type = PNG_COLOR_TYPE_RGB;
-  } else {
-    color_type = PNG_COLOR_TYPE_RGBA;
-  }
-
-  png_set_IHDR(png_ptr, info_ptr, w, h,
-               bit_depth, color_type, PNG_INTERLACE_NONE,
-               PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-
-  png_write_info(png_ptr, info_ptr);
-
-  // prepare row pointers
-  std::vector<png_bytep> row_pointers;
-  const int chan_bytes = bit_depth / 8;
-  const int pixel_bytes = chan_bytes * channels;
-  const int row_bytes = pixel_bytes * w;
-  for (int i = 0; i < h; ++i) {
-    png_bytep row_ptr = reinterpret_cast<png_bytep>(data + row_bytes * i);
-    row_pointers.push_back(row_ptr);
-  }
-
-  // write bytes
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    fprintf(stderr, "Error: error during writing body\n");
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-    fclose(fp);
-    exit(1);
-  }
-
-  png_write_image(png_ptr, row_pointers.data());
-
-  // end write
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    fprintf(stderr, "Error: error during end of write\n");
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-    fclose(fp);
-    exit(1);
-  }
-
-  png_write_end(png_ptr, NULL);
-  png_destroy_write_struct(&png_ptr, &info_ptr);
-  fclose(fp);
 }
 
 void show_usage(FILE* stream) {

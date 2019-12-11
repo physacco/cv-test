@@ -16,10 +16,10 @@ ENDFOREACH()
 ADD_EXECUTABLE(mat2jpg mat2jpg.cpp)
 TARGET_LINK_LIBRARIES(mat2jpg jpeg)
 
-ADD_EXECUTABLE(mat2png mat2png.cpp)
+ADD_EXECUTABLE(mat2png mat2png.cpp PNGUtils.cpp)
 TARGET_LINK_LIBRARIES(mat2png png)
 
-ADD_EXECUTABLE(png2ppm png2ppm.cpp ppm.cpp)
+ADD_EXECUTABLE(png2ppm png2ppm.cpp ppm.cpp PNGUtils.cpp)
 TARGET_LINK_LIBRARIES(png2ppm png)
 
 ADD_EXECUTABLE(img2ppm img2ppm.cpp ppm.cpp)
