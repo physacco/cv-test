@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
